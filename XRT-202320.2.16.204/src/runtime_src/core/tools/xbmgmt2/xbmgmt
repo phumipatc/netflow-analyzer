@@ -1,0 +1,56 @@
+#!/bin/bash
+
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Copyright (C) 2020-2022 Xilinx, Inc.
+#
+
+# -- Detect a Windows environment and automatically switch to the .bat file
+if [[ "`uname`" == windows32* ]] || [[ "`uname`" == CYGWIN* ]] ; then
+    trap "" INT
+    "$0.bat" "$@"
+    exit $?
+fi
+
+# Working variables
+XRT_PROG=xbmgmt2
+
+# Examine the options and look for -new/--new
+XRTWARP_PROG_ARGS_size=0
+XRTWRAP_PROG_ARGS=()
+while [ $# -gt 0 ]; do
+    case "$1" in
+    # Indicates that the legacy was specified
+    -legacy|--legacy)
+        echo "----------------------------------------------------------------------"
+        echo "Error: Obsoleted option
+       The --legacy option is no longer supported.
+    
+       For legacy migration, please refer to the XRT github.io utility 
+       migration guide.
+
+       Commands, options, arguments and their descriptions can also be 
+       reported via the --help option."
+        echo "----------------------------------------------------------------------"
+        exit 1
+	    ;;
+	# Copy the options the remaining options
+	*)
+	    XRTWRAP_PROG_ARGS[$XRTWARP_PROG_ARGS_size]="$1"
+	    XRTWARP_PROG_ARGS_size=$(($XRTWARP_PROG_ARGS_size + 1))
+	    shift
+	    ;;
+    esac
+done
+
+# -- Find and call the loader
+XRT_LOADER="`dirname \"$0\"`/unwrapped/loader"
+
+if [ ! -f "$XRT_LOADER" ]; then
+    echo "ERROR: Could not find 64-bit loader executable."
+    echo "ERROR: ${XRT_LOADER} does not exist."
+    exit 1
+fi
+
+"${XRT_LOADER}" -exec ${XRT_PROG} "${XRTWRAP_PROG_ARGS[@]}"

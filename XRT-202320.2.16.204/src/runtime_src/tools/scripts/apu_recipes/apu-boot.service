@@ -1,0 +1,10 @@
+[Unit]
+Description=apu-boot
+After=skd.service
+ 
+[Service]
+ExecStart=/usr/bin/apu-boot
+StandardOutput=journal+console
+ 
+[Install]
+WantedBy=multi-user.target
