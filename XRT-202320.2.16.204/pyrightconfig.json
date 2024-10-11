@@ -1,7 +1,0 @@
-{
-  "extraPaths": [
-      "src/python",
-      "src/python/pybind11/src",
-      "build/Debug/opt/xilinx/xrt/python"
-  ]
-}
