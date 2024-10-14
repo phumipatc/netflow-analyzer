@@ -1,0 +1,1 @@
+/usr/bin/g++ -g CMakeFiles/nfa.dir/main.cpp.o -o nfa_exe  framework/device/libdevice.a /usr/lib/x86_64-linux-gnu/libuuid.so /opt/xilinx/xrt/lib/libxrt_core.so /opt/xilinx/xrt/lib/libxrt_coreutil.so
