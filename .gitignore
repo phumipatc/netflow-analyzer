@@ -31,5 +31,9 @@
 *.out
 *.app
 
+# VS Code
+.vscode/
+*.code-workspace
+
 _*
 
