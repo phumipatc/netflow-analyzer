@@ -5,21 +5,21 @@ CFLAGS += -g
 CFLAGS += -I. -I/usr/local/include/qdma -I../dma-utils -I../device-manager
 CFLAGS += $(EXTRA_FLAGS)
 
-NETFLOW-RECEIVER = netflow-receiver
+NETFLOW-ANALYZER = netflow-analyzer
 DMA-UTILS_OBJS := $(patsubst %.c,%.o,$(wildcard ../dma-utils/*.c))
 DEVICE-MANAGER_OBJS := $(patsubst %.c,%.o,$(wildcard ../device-manager/*.c))
-NETFLOW-RECEIVER_OBJS := $(patsubst %.c,%.o,$(wildcard *.c))
-# NETFLOW-RECEIVER_OBJS += $(DMA-UTILS_OBJS)
-NETFLOW-RECEIVER_OBJS += $(DEVICE-MANAGER_OBJS)
+NETFLOW-ANALYZER_OBJS := $(patsubst %.c,%.o,$(wildcard *.c))
+NETFLOW-ANALYZER_OBJS += $(DEVICE-MANAGER_OBJS)
+# NETFLOW-ANALYZER_OBJS += $(DMA-UTILS_OBJS)
 
 ifneq ($(CROSS_COMPILE_FLAG),)
 	CC=$(CROSS_COMPILE_FLAG)gcc
 endif
 
-all: clean netflow-receiver
+all: clean netflow-analyzer
 
-netflow-receiver: $(NETFLOW-RECEIVER_OBJS)
-	@echo $(NETFLOW-RECEIVER_OBJS)
+netflow-analyzer: $(NETFLOW-ANALYZER_OBJS)
+	@echo $(NETFLOW-ANALYZER_OBJS)
 	$(CC) -pthread -lrt -o $@ $^ -laio -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
 
 %.o: %.c
@@ -28,4 +28,4 @@ netflow-receiver: $(NETFLOW-RECEIVER_OBJS)
 clean:
 	@rm -f *.o */*.o ../dma-utils/*.o
 	@rm -f *.o */*.o ../device-manager/*.o
-	rm -rf *.o *.bin $(NETFLOW-RECEIVER)
+	rm -rf *.o *.bin $(NETFLOW-ANALYZER)

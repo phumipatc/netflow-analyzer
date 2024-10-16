@@ -1,27 +1,28 @@
 #ifndef DEVICE_MANAGER_H
 #define DEVICE_MANAGER_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <string.h>
+#define MAX_DEVICES 10
 
-// DeviceManager structure
 typedef struct {
-    int fd;
-    char* devname;
-    char** available_devices;
-    int num_devices;
+    int id;         // Unique identifier for the device
+    char name[256]; // Human-readable name of the device
+    char path[256]; // File path to the device (for example, /dev/qdma0)
+} Device;
+
+typedef struct {
+    Device devices[MAX_DEVICES];
+    int num_devices;  // Total number of devices found
 } DeviceManager;
 
-// Function declarations
-int DeviceManager_init(DeviceManager *dm);
-void DeviceManager_close(DeviceManager *dm);
-void DeviceManager_destructor(DeviceManager *dm);
-void DeviceManager_list_devices(DeviceManager *dm);
-int DeviceManager_open_device(DeviceManager *dm, const char* dev);
-int DeviceManager_select_device(DeviceManager *dm);
-int DeviceManager_prompt_user(DeviceManager *dm, const char* prompt);
+// Constructor and Destructor
+DeviceManager* create_device_manager();
+void destroy_device_manager(DeviceManager* dm);
+
+// Device operations
+int list_devices(DeviceManager* dm);
+int prompt_user(DeviceManager* dm);
+int select_device(DeviceManager* dm, int device_id);
+int open_device(DeviceManager* dm, int device_id);
+int close_device(DeviceManager* dm, int device_id);
 
 #endif // DEVICE_MANAGER_H

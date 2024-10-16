@@ -1,65 +1,113 @@
 #include "device_manager.h"
 
-int DeviceManager_init(DeviceManager *dm) {
-    // Simulate available devices
-    dm->available_devices = (char**)malloc(3 * sizeof(char*));
-    dm->available_devices[0] = strdup("/dev/xdma0");
-    dm->available_devices[1] = strdup("/dev/xdma1");
-    dm->available_devices[2] = strdup("/dev/xdma2");
-    dm->num_devices = 3;
-    dm->devname = NULL;
-    dm->fd = -1;
-    return 0;
-}
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
 
-void DeviceManager_destructor(DeviceManager *dm) {
-    // Free device names
-    for (int i = 0; i < dm->num_devices; i++) {
-        free(dm->available_devices[i]);
+
+DeviceManager* create_device_manager() {
+    DeviceManager* dm = (DeviceManager*)malloc(sizeof(DeviceManager));
+    if (!dm) {
+        fprintf(stderr, "Error: Could not allocate memory for DeviceManager.\n");
+        return NULL;
     }
-    free(dm->available_devices);
+    dm->num_devices = 0;
+    return dm;
 }
 
-void DeviceManager_list_devices(DeviceManager *dm) {
+void destroy_device_manager(DeviceManager* dm) {
+    if (dm) {
+        free(dm);
+    }
+}
+
+int list_devices(DeviceManager* dm) {
+    
+    if (!dm) return -1;
+
+    // Discover devices using dmactl
+
+
+    // List available devices
     printf("Available devices:\n");
     for (int i = 0; i < dm->num_devices; i++) {
-        printf("[%d] %s\n", i, dm->available_devices[i]);
+        printf("%d: %s (Path: %s)\n", dm->devices[i].id, dm->devices[i].name, dm->devices[i].path);
     }
-}
 
-int DeviceManager_open_device(DeviceManager *dm, const char* dev) {
-    dm->devname = strdup(dev);
-    dm->fd = open(dm->devname, O_RDWR | O_NONBLOCK);
-    if (dm->fd < 0) {
-        perror("Failed to open device");
-        return -1;
-    }
     return 0;
 }
 
-void DeviceManager_close(DeviceManager *dm) {
-    if (dm->fd > 0) {
-        close(dm->fd);
-        dm->fd = -1;
-    }
-    if (dm->devname) {
-        free(dm->devname);
-        dm->devname = NULL;
-    }
-}
-
-int DeviceManager_select_device(DeviceManager *dm) {
-    int choice = DeviceManager_prompt_user(dm, "Select device index:");
-    if (choice < 0 || choice >= dm->num_devices) {
-        fprintf(stderr, "Invalid device selection!\n");
+int prompt_user(DeviceManager* dm) {
+    if (!dm || dm->num_devices == 0) {
+        fprintf(stderr, "Error: No devices available to select.\n");
         return -1;
     }
-    return DeviceManager_open_device(dm, dm->available_devices[choice]);
+
+    int selected_device_id;
+    printf("Enter the device ID you want to use: ");
+    if (scanf("%d", &selected_device_id) != 1) {
+        fprintf(stderr, "Error: Invalid input.\n");
+        return -1;
+    }
+
+    if (selected_device_id < 0 || selected_device_id >= dm->num_devices) {
+        fprintf(stderr, "Error: Invalid device ID.\n");
+        return -1;
+    }
+
+    // Select the device
+    if (select_device(dm, selected_device_id) != 0) {
+        return -1;
+    }
+
+    return 0;
 }
 
-int DeviceManager_prompt_user(DeviceManager *dm, const char* prompt) {
-    int choice;
-    printf("%s ", prompt);
-    scanf("%d", &choice);
-    return choice;
+int select_device(DeviceManager* dm, int device_id) {
+    if (!dm || device_id < 0 || device_id >= dm->num_devices) {
+        fprintf(stderr, "Error: Invalid device ID for selection.\n");
+        return -1;
+    }
+
+    printf("Selected device: %s (Path: %s)\n", dm->devices[device_id].name, dm->devices[device_id].path);
+    return 0;
+}
+
+int open_device(DeviceManager* dm, int device_id) {
+    if (!dm || device_id < 0 || device_id >= dm->num_devices) {
+        fprintf(stderr, "Error: Invalid device ID for opening.\n");
+        return -1;
+    }
+
+    int fd = open(dm->devices[device_id].path, O_RDWR);
+    if (fd < 0) {
+        fprintf(stderr, "Error: Could not open device %s. Error code: %d\n", dm->devices[device_id].path, errno);
+        perror("open_device");
+        return -1;
+    }
+
+    printf("Device %s opened successfully (FD: %d)\n", dm->devices[device_id].name, fd);
+    return fd;  // Return the file descriptor
+}
+
+int close_device(DeviceManager* dm, int device_id) {
+    if (!dm || device_id < 0 || device_id >= dm->num_devices) {
+        fprintf(stderr, "Error: Invalid device ID for closing.\n");
+        return -1;
+    }
+
+    int fd = open_device(dm, device_id);  // Retrieve FD (in practice, FD might be stored and retrieved differently)
+    if (fd < 0) return -1;
+
+    if (close(fd) < 0) {
+        fprintf(stderr, "Error: Could not close device %s. Error code: %d\n", dm->devices[device_id].path, errno);
+        perror("close_device");
+        return -1;
+    }
+
+    printf("Device %s closed successfully.\n", dm->devices[device_id].name);
+    return 0;
 }
