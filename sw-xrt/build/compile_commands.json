@@ -1,0 +1,14 @@
+[
+{
+  "directory": "/home/hoshino/netflow-analyzer/sw/build/app",
+  "command": "/usr/bin/g++ -D__STDC_FORMAT_MACROS -I/home/hoshino/netflow-analyzer/sw/framework/device -I/opt/xilinx/xrt/include -g -std=gnu++11 -Wall -o CMakeFiles/nfa.dir/main.cpp.o -c /home/hoshino/netflow-analyzer/sw/app/main.cpp",
+  "file": "/home/hoshino/netflow-analyzer/sw/app/main.cpp",
+  "output": "app/CMakeFiles/nfa.dir/main.cpp.o"
+},
+{
+  "directory": "/home/hoshino/netflow-analyzer/sw/build/app/framework/device",
+  "command": "/usr/bin/g++ -D__STDC_FORMAT_MACROS -I/opt/xilinx/xrt/include -g -std=gnu++11 -Wall -o CMakeFiles/device.dir/device.cpp.o -c /home/hoshino/netflow-analyzer/sw/framework/device/device.cpp",
+  "file": "/home/hoshino/netflow-analyzer/sw/framework/device/device.cpp",
+  "output": "app/framework/device/CMakeFiles/device.dir/device.cpp.o"
+}
+]
